@@ -3,6 +3,8 @@
 #### 添加依赖库
 
 ```
+yum -y groupinstall "Development Tools" 
+
 yum install cairo-devel libjpeg-devel libpng-devel uuid-devel ffmpeg-devel freerdp-devel pango-devel libssh2-devel libtelnet-devel    libvncserver-devel pulseaudio-libs-devel openssl-devel libvorbis-devel libwebp-devel wget gedit  java-1.8.0-openjdk*
 ```
 
@@ -46,12 +48,47 @@ cd /opt/
 wget http://mirror.bit.edu.cn/apache/tomcat/tomcat-8/v8.5.30/bin/apache-tomcat-8.5.30.tar.gz
 tar -zxvf apache-tomcat-8.5.30.tar.gz -C /usr/local/
 cd /usr/local/
-mv apache-tomcat-8.5.29 tomcat
-cd tomact/bin
+mv apache-tomcat-8.5.30 tomcat
+cd tomcat/bin
 ./startup.sh
 
 systemctl stop firewalld
 systemctl disable firewalld
+```
+##### tomcat开机自启
+
+* 新建服务文件
+```
+vi /lib/systemd/system/tomcat.service
+######以下是内容########
+[Unit]
+Description=tomcat
+After=network.target
+ 
+[Service]
+Type=oneshot
+ExecStart=/usr/local/tomcat/bin/startup.sh   //自已的tomcat目录
+ExecStop=/usr/local/tomcat/bin/shutdown.sh
+ExecReload=/bin/kill -s HUP $MAINPID
+RemainAfterExit=yes
+ 
+[Install]
+WantedBy=multi-user.target
+```
+
+* 设置脚本权限
+```
+chmod 754 /lib/systemd/system/tomcat.service 
+```
+
+* 启动参数
+```
+#启动服务 
+systemctl start tomcat.service   
+#关闭服务   
+systemctl stop tomcat.service   
+#开机启动   
+systemctl enable tomcat.service
 ```
 
 #### 下载guacamole安装包
@@ -71,6 +108,8 @@ cd guacamole-server-0.9.14
 ./configure --with-init-dir=/etc/init.d
 make && make install
 ldconfig
+
+/sbin/chkconfig guacd on  #设置开机自启动，根据需要
 ```
 
 #### 安装guacamole-client
@@ -90,6 +129,7 @@ mvn package  #安装各种依赖
 cd /opt/
 wget https://mirrors.tuna.tsinghua.edu.cn/apache/guacamole/0.9.14/binary/guacamole-0.9.14.war
 cp guacamole-0.9.14.war /usr/local/tomact/webapps/guacamole.war
+ln -s /etc/guacamole/guacamole.properties /usr/local/tomact/.guacamole/    #软连接可以忽略
 ```
 
 #### 配置guacamole
@@ -196,7 +236,7 @@ vi /etc/guacamole/user-mapping.xml
 #### 重启tomcat,并启动guacd服务
 
 ```
-cd /usr/local/tomact/bin/
+cd /usr/local/tomcat/bin/
 ./shutdown.sh && ./startup.sh
 
 
