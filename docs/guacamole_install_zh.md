@@ -1,5 +1,13 @@
 ## Centos7 部署 guacamole0.9.14
 
+#### 关闭防火墙
+
+```
+# setenforce 0  # 可以设置配置文件永久关闭
+# systemctl stop iptables.service
+# systemctl stop firewalld.service
+```
+
 #### 添加依赖库
 
 ```
@@ -243,11 +251,22 @@ cd /usr/local/tomcat/bin/
 /etc/init.d/guacd start
 ```
 
-#### 浏览器访问 http://192.168.1.102:8080/guacamole/#/
+#### 浏览器访问 http://{您的服务器IP地址}:8080/guacamole/
 
 
 #### 使用mysql 扩展认证用户
 
+##### 安装mysql5.5服务 [mysql安装向导](https://blog.csdn.net/petrel2015/article/details/78822466)
+
+```
+wget http://dev.mysql.com/get/mysql57-community-release-el7-10.noarch.rpm
+yum -y install mysql57-community-release-el7-10.noarch.rpm
+vi /etc/yum.repos.d/mysql-community.repo   # 修改内容启用5.5
+yum -y install mysql-server
+systemctl enable mysqld
+systemctl start mysqld
+systemctl status mysqld
+```
 
 *  下载guacamole-auth-jdbc 扩展驱动
 
@@ -305,3 +324,5 @@ mysql-password: guacamole
 ```
 
 * 重启tomcat 默认账号"guacadmin"密码 "guacadmin"
+
+* 浏览器访问 http://{您的服务器IP地址}:8080/guacamole/
