@@ -1,5 +1,5 @@
 # 创建系统账户
-useradd yuanyl
+useradd yuanyl   
 passwd yuanyl
 
 # 编辑 visudo 以防出现 “s not in the sudoers file. This incident will be reported.”
